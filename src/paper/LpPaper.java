@@ -9,33 +9,37 @@ public class LpPaper {
 	        GRBModel  model = new GRBModel(env);
 
 	        // Create variables
-	        int c = 1;
-	        int p = 2;
-	        int l = 1;
-	        int t = 1; //cloud, single
-	        int e = 1;
-	        int m = 2;
-	        int fixed[][] = {{1}};
-	        int var[][] = {{1}};
-	        int elas[][] = {{1}};
-	        int cap[] = {1, 1};
+	        int c = 2;
+	        int p = 5;
+	        int l = 3;
+	        int t = 2; //cloud, single
+	        int e = 2;
+	        int m = 3;
+	        int fixed[][] = {{1, 2}, {1, 2}, {1, 2}};
+	        int var[][] = {{1, 2}, {1, 2}, {1, 2}};
+	        int elas[][] = {{1, 2}, {1, 2}, {1, 2}};
+	        int cap[] = {1, 2, 3, 1, 2};
 	        int FP[][][] = {
-	        	{{1}, {1}}
+	        	{{1, 3}, {2, 3}, {3, 4}},
+	        	{{1, 3}, {2, 3}, {3, 4}}
 	        };
 	        int SC[][] = {
+	        	{0, 1, 2},
 	        	{1, 2}
 	        };
 	        int functionsList[][] = {
-	        	{0, 1}
+	        	{1, 2, 3, 0, 0},
+	        	{1, 3, 4, 5, 0}
 	        };
 	        int T[][] = {
-	        	{1}
+	        	{1, 2}, 
+	        	{1, 3}
 	        };
-	        int PC[] = {500};
-	        int location[] = {0, 0};
-	        int type[] =     {0, 0};
-	        float Lat[][][][] = {{{{1, 1}, {1, 1}}, {{1, 1}, {1, 1}}}, {{{1, 1}, {1, 1}}, {{1, 1}, {1, 1}}}};
-	        	        
+	        int PC[] = {100, 200};
+	        int location[] = {0, 1, 2, 2, 2};
+	        int type[] =     {0, 1, 1, 0, 1};
+	        float Lat[][][][] = {{{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}, {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}, {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}}, {{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}, {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}, {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}}, {{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}, {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}, {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}}, {{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}, {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}, {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}}, {{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}, {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}, {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}}};
+	         	        
 	        double M = 1.0;
 	        //Define decision variables below
 	        GRBVar[] active = new GRBVar[p];
@@ -158,7 +162,7 @@ public class LpPaper {
 	    	        		        expr2 = new GRBLinExpr();
 	    	        		        expr2.addTerm(1.0, f[ci][ei][pi][mi][pi2][mi2]);
 	    	        		        expr2.addTerm(M, pF2[pi][mi][pi2][mi2]);
-	    	        		        expr2.addConstant(-1);
+	    	        		        expr2.addConstant(-M);
 	    	        		        model.addConstr(expr1, GRB.GREATER_EQUAL, expr2, "C2_3");	    	        		      	    	        		       
 	    	        			}
 	    	        		}	
@@ -184,7 +188,7 @@ public class LpPaper {
 	        		        expr2.addTerm(1.0, provFunc[pi][mi]);
 	        		        expr2.addTerm(1.0, provFunc[pi2][mi2]);
 	        		        expr2.addConstant(-1);
-	        		        model.addConstr(expr1, GRB.GREATER_EQUAL, expr2, "C2_2");	        				
+	        		        model.addConstr(expr1, GRB.GREATER_EQUAL, expr2, "C3_2");	        				
 	        			}
 	        		}
 				}
@@ -225,7 +229,7 @@ public class LpPaper {
         				}
         			}
 					expr2.addTerm(1.0, res[pi]);
-					model.addConstr(expr1, GRB.EQUAL, expr2, "E5");
+					model.addConstr(expr1, GRB.LESS_EQUAL, expr2, "E5");
         		}
         	}	        
 			for(int pi=0; pi<p; pi++){
@@ -253,7 +257,7 @@ public class LpPaper {
 		        		for(int pi2=0; pi2<p; pi2++){
 		        			for(int mi2=0; mi2<m; mi2++){
 		        				//expr1.addTerm(1.0, f[ci][ei][pi][functionsList[ci][0]][pi2][mi2]);
-		        				expr1.addTerm(1.0, fb[ci][ei][pi][functionsList[ci][0]][pi2][mi2]);
+		        				expr1.addTerm(1.0, f[ci][ei][pi][SC[ci][0]][pi2][mi2]);
 		        			}
 		        		}
 					}
@@ -266,27 +270,17 @@ public class LpPaper {
 			for(int ei=0; ei<e; ei++){
 				for(int pi=0; pi<p; pi++){
 					for(int ci=0; ci<c; ci++){
-						for(int j=2; j<m; j++){
-							for(int mi=0; mi<m; mi++){
-								GRBLinExpr expr1 = new GRBLinExpr();
-								GRBLinExpr expr2 = new GRBLinExpr();
-								for(int pi2=0; pi2<p; pi2++){
-									for(int mi2=0; mi2<m; mi2++){
-										if(mi==functionsList[ci][j] && mi2==functionsList[ci][j-1]){
-											expr1.addTerm(1.0, f[ci][ei][pi2][mi2][pi][mi]);
-											System.out.println(f[ci][ei][pi2][mi2][pi][mi]);
-										}
-									}
-								}
-
-								for(int pi2=0; pi2<p; pi2++){
-									for(int mi2=0; mi2<m; mi2++){
-										if(mi==functionsList[ci][j] && mi2==functionsList[ci][j+1])
-											expr1.addTerm(1.0, f[ci][ei][pi][mi][pi2][mi2]);
-									}
-								}
-								model.addConstr(expr1, GRB.EQUAL, expr2, "E9");
+						for(int j=1; j<SC[ci].length-1; j++){
+							int mi = SC[ci][j];
+							GRBLinExpr expr1 = new GRBLinExpr();
+							GRBLinExpr expr2 = new GRBLinExpr();
+							for(int pi2=0; pi2<p; pi2++){
+								int mi2 = SC[ci][j-1];
+								expr1.addTerm(1.0, f[ci][ei][pi2][mi2][pi][mi]);
+								mi2 = SC[ci][j+1];
+								expr2.addTerm(1.0, f[ci][ei][pi][mi][pi2][mi2]);
 							}
+							model.addConstr(expr1, GRB.EQUAL, expr2, "E9");							
 						}
 					}
 				}
@@ -296,15 +290,12 @@ public class LpPaper {
 				for(int ei=0; ei<e; ei++){
 					GRBLinExpr expr1 = new GRBLinExpr();
 					GRBLinExpr expr2 = new GRBLinExpr();
-					for(int pi=0; pi<=p; pi++){
-						for(int pi2=0; pi2<=p; pi2++){
-							for(int j=1; j<m-1; j++){
-								for(int mi=0; mi<m; mi++){
-									for(int mi2=0; mi2<m; mi2++){
-										if(mi==functionsList[ci][j] && mi2==functionsList[ci][j+1])
-											expr1.addTerm(Lat[pi][mi][pi2][mi2], f[ci][ei][pi][mi][pi2][mi2]);
-									}
-								}
+					for(int j=0; j<SC[ci].length-1; j++){
+						for(int pi=0; pi<p; pi++){
+							for(int pi2=0; pi2<p; pi2++){
+								int mi = SC[ci][j];
+								int mi2 = SC[ci][j+1];								
+								expr1.addTerm(Lat[pi][mi][pi2][mi2], f[ci][ei][pi][mi][pi2][mi2]);
 							}
 						}
 					}
@@ -316,11 +307,25 @@ public class LpPaper {
 	        // Optimize model
 			System.out.println("Solving-----");
 	        model.optimize();
-	        //model.computeIIS();
 	        int status = model.get(GRB.IntAttr.Status);
 	        if (status == GRB.Status.UNBOUNDED) {
 	          System.out.println("The model cannot be solved "
 	              + "because it is unbounded");
+	        }
+	        else if(status == GRB.Status.INFEASIBLE){
+		        model.computeIIS();
+	        	System.out.println("Printing constraints that led to infeasibility: #############################");
+	        	for(GRBConstr constr: model.getConstrs()){
+	        		if(constr.get(GRB.IntAttr.IISConstr)>0){
+	        			System.out.println(constr.get(GRB.StringAttr.ConstrName));
+	        		}
+	        	}
+	        	System.out.println("Printing names of variables inconsistent: ");
+	        	for(GRBVar v:model.getVars()){
+	        	    if (v.get(GRB.IntAttr.IISLB) > 0 || v.get(GRB.IntAttr.IISUB) > 0){
+	        	        System.out.println(v.get(GRB.StringAttr.VarName));
+	        	    }
+	        	}
 	        }
 	        else if (status == GRB.Status.OPTIMAL) {
 	        	System.out.println("Printing optimal solution detail#########################");
@@ -339,64 +344,35 @@ public class LpPaper {
 		    	        		for(int pi2=0; pi2<p; pi2++){
 		    	        			for(int mi2=0; mi2<m; mi2++){
 		    	        				System.out.print(f[ci][ei][pi][mi][pi2][mi2].get(GRB.DoubleAttr.X)+" ");
-					        			}
-					        		}
-								}
+				        			}
+				        		}
 							}
 						}
 					}
-					
-					System.out.println("Printing pF(provFunc):- ");
-					for(int pi=0; pi<p; pi++){
-						for(int mi=0; mi<m; mi++){
-							System.out.println(provFunc[pi][mi].get(GRB.DoubleAttr.X));    	        		
-						}
+				}
+				
+				System.out.println("Printing pF(provFunc):- ");
+				for(int pi=0; pi<p; pi++){
+					for(int mi=0; mi<m; mi++){
+						System.out.println(provFunc[pi][mi].get(GRB.DoubleAttr.X));    	        		
 					}
-					
-					System.out.println("Printing pF2:- ");
-					for(int pi=0; pi<p; pi++){
-						for(int mi=0; mi<m; mi++){
-							for(int pi2=0; pi2<p; pi2++){
-								for(int mi2=0; mi2<m; mi2++){
-									System.out.println(pF2[pi][mi][pi2][mi2].get(GRB.DoubleAttr.X));
-								}
+				}
+				
+				System.out.println("Printing pF2:- ");
+				for(int pi=0; pi<p; pi++){
+					for(int mi=0; mi<m; mi++){
+						for(int pi2=0; pi2<p; pi2++){
+							for(int mi2=0; mi2<m; mi2++){
+								System.out.println(pF2[pi][mi][pi2][mi2].get(GRB.DoubleAttr.X));
 							}
 						}
 					}
-					
-					for(int ei=0; ei<e; ei++){
-						for(int pi=0; pi<p; pi++){
-							int sum = 0;
-							for(int mi=0; mi<m; mi++){
-								for(int ci=0; ci<c; ci++){
-					        		for(int pi2=0; pi2<p; pi2++){
-					        			for(int mi2=0; mi2<m; mi2++){
-					        				sum += FP[ci][mi][type[pi]]*T[ci][ei]*fb[ci][ei][pi][mi][pi2][mi2].get(GRB.DoubleAttr.X);
-					        				System.out.println(FP[ci][mi][type[pi]]);
-					        			}
-					        		}
-								}
-							}
-							System.out.println(sum);
-						}
-	        	}	        	
+				}        	
 	        }
 	        else if (status != GRB.Status.INF_OR_UNBD &&
 	            status != GRB.Status.INFEASIBLE    ) {
 	        	System.out.println("Optimization was stopped with status " + status);	        
 	        }
-//        	System.out.println("Printing constraints that led to infeasibility: ");
-//        	for(GRBConstr constr: model.getConstrs()){
-//        		if(constr.get(GRB.IntAttr.IISConstr)>0){
-//        			System.out.println(constr.get(GRB.StringAttr.ConstrName));
-//        		}
-//        	}
-//        	System.out.println("Printing names of variables inconsistent: ");
-//        	for(GRBVar v:model.getVars()){
-//        	    if (v.get(GRB.IntAttr.IISLB) > 0 || v.get(GRB.IntAttr.IISUB) > 0){
-//        	        System.out.println(v.get(GRB.StringAttr.VarName));
-//        	    }
-//        	}
 
 	        System.out.println("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
 
