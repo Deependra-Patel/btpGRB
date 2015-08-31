@@ -9,34 +9,35 @@ public class LpPaper {
 	        GRBModel  model = new GRBModel(env);
 
 	        // Create variables
-	        int c = 2;
-	        int p = 5;
-	        int l = 3;
-	        int t = 2; //cloud, single
-	        int e = 2;
-	        int m = 3;
-	        int fixed[][] = {{0, 5}, {0, 5}, {0, 5}};
-	        int var[][] = {{0, 5}, {0, 5}, {0, 5}};
-	        int elas[][] = {{3, 0}, {3, 0}, {3, 0}};
-	        int cap[] = {15, 15, 15, 15, 15};
-	        int FP[][][] = {
+	        int c = 2; //Number of classes
+	        int p = 5; //Number of provisions
+	        int l = 3; //Number of locations
+	        int t = 2; //Number of types (cloud, single)
+	        int e = 2; //Number of epochs
+	        int m = 3; //Number of functions 
+	        int fixed[][] = {{0, 5}, {0, 5}, {0, 5}}; //Fixed cost [location][type]
+	        int var[][] = {{0, 5}, {0, 5}, {0, 5}}; //Variable cost [location][type]
+	        int elas[][] = {{3, 0}, {3, 0}, {3, 0}}; //Elastic cost [location][type]
+	        int cap[] = {15, 15, 15, 15, 15}; //Cap [provisions]
+	        int FP[][][] = { //Per packet processing cost [class][function][type]
 	        	{{1, 3}, {2, 3}, {3, 4}},
 	        	{{1, 3}, {2, 3}, {3, 4}}
 	        };
-	        int SC[][] = {
+	        int SC[][] = { //Service chain list of functions for [classes]
 	        	{0, 1, 2},
 	        	{1, 2}
 	        };
 
-	        int T[][] = {
-	        	{1, 2}, 
-	        	{1, 3}
+	        int T[][] = { //Traffic [class][epoch]
+	        	{10, 10}, 
+	        	{10, 10}
 	        };
-	        float PC[] = {15.0f, 15.0f};
-	        int location[] = {0, 1, 2, 2, 2};
-	        int type[] =     {0, 1, 1, 0, 1};
+	        float PC[] = {15.0f, 15.0f}; //Performance constraint [classes]
+	        int location[] = {0, 1, 2, 2, 2}; //Location of provision [provision] -> 0 to l-1
+	        int type[] =     {0, 1, 1, 0, 1}; //Type of provision [provision] -> 0 to t-1
 	        float Lat[][][][] = {{{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}}, {{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}}, {{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}}, {{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}}, {{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}, {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}, {1, 1, 1}}}};
-	         	        
+	        //Latency [provision][function][provision][function]
+	        
 	        //Define decision variables below
 	        GRBVar[] active = new GRBVar[p];
 	        for(int i=0; i<p; i++){
@@ -151,11 +152,8 @@ public class LpPaper {
 				for(int ei=0; ei<e; ei++){
 					GRBLinExpr expr1 = new GRBLinExpr();				
 					for(int pi=0; pi<p; pi++){
-		        		for(int pi2=0; pi2<p; pi2++){
-		        			//for(int mi2=0; mi2<m; mi2++){
-		        				//expr1.addTerm(1.0, f[ci][ei][pi][functionsList[ci][0]][pi2][mi2]);
-		        				expr1.addTerm(1.0, f[ci][ei][pi][SC[ci][0]][pi2][SC[ci][1]]);
-		        			//}
+		        		for(int pi2=0; pi2<p; pi2++){		        			
+		        			expr1.addTerm(1.0, f[ci][ei][pi][SC[ci][0]][pi2][SC[ci][1]]);
 		        		}
 					}
 					GRBLinExpr expr2 = new GRBLinExpr();
@@ -247,17 +245,7 @@ public class LpPaper {
 					}
 				}
 		        
-		        float sum = 0;
-				for(int pi=0; pi<p; pi++){
-					for(int pi2=0; pi2<p; pi2++){
-						int mi = SC[0][0];
-						int mi2 = SC[0][1];								
-						sum += f[0][0][pi][mi][pi2][mi2].get(GRB.DoubleAttr.X);
-					}
-				}
-				System.out.println("here: "+ sum);
-		        
-	        	System.out.println("Printing active (0,1) provisions: ");
+	        	System.out.println("\nPrinting active (0,1) provisions: ");
 			  	for(int pi=0; pi<p; pi++){
 				  	System.out.println(active[pi].get(GRB.DoubleAttr.X));
 			  	}				      
@@ -267,7 +255,7 @@ public class LpPaper {
 	        	System.out.println("Optimization was stopped with status " + status);	        
 	        }
 
-	        System.out.println("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
+	        System.out.println("Objective (Minimum cost): " + model.get(GRB.DoubleAttr.ObjVal));
 
 	        // Dispose of model and environment
 

@@ -1,0 +1,8 @@
+RemoteSystemsTempFiles/*
+build/paper/*
+.metadata/*
+.recommenders/*
+LP/.classpath
+LP/.project
+LP/.settings/
+LP/bin
